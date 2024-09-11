@@ -1,0 +1,27 @@
+[
+    {
+        "id": "6be28320ab1a3081",
+        "type": "inject",
+        "z": "4c339037dcc34691",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "[{\"role\":\"user\",\"content\":\"Isolation Test Failed ต้องแก้ไขอย่างไร\"}]",
+        "payloadType": "json",
+        "x": 310,
+        "y": 220,
+        "wires": [
+            [
+                "5eec3436bfad5ce0"
+            ]
+        ]
+    }
+]

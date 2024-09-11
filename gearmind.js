@@ -1,3 +1,6 @@
+const http = require('http');
+const https = require('https');
+
 module.exports = function(RED) {
     function GearMindNode(config) {
         RED.nodes.createNode(this, config);
@@ -14,31 +17,43 @@ module.exports = function(RED) {
             }
 
             // Prepare the request options
-            var options = {
-                url: 'https://gearmind.geworn.cloud/api/v1/chat',
+            const postData = JSON.stringify({ messages: msg.payload });
+            const options = {
+                hostname: 'gearmind.geworn.cloud',
+                port: 443,
+                path: '/api/v1/chat',
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + node.apiKey
-                },
-                body: JSON.stringify({ messages: msg.payload })
+                    'Authorization': 'Bearer ' + node.apiKey,
+                    'Content-Length': Buffer.byteLength(postData)
+                }
             };
 
             // Make the API request
-            RED.util.httpRequest(options, function(err, res, body) {
-                if (err) {
-                    node.error("Error making API request: " + err);
-                    return;
-                }
-
-                try {
-                    var response = JSON.parse(body);
-                    msg.payload = response.content;
-                    node.send(msg);
-                } catch (e) {
-                    node.error("Error parsing API response: " + e);
-                }
+            const req = https.request(options, (res) => {
+                let body = '';
+                res.on('data', (chunk) => {
+                    body += chunk;
+                });
+                res.on('end', () => {
+                    try {
+                        const response = JSON.parse(body);
+                        msg.payload = response.content;
+                        node.send(msg);
+                    } catch (e) {
+                        node.error("Error parsing API response: " + e);
+                    }
+                });
             });
+
+            req.on('error', (e) => {
+                node.error("Error making API request: " + e);
+            });
+
+            // Write data to request body
+            req.write(postData);
+            req.end();
         });
     }
 
